@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контейнер с воротами и мячами</title>
+    <style>
+        @font-face {
+            font-family: 'Intro';
+            src: url('intro.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background: url('footfon.JPEG') no-repeat center center; /* Установка фонового изображения */
+            background-size: cover; /* Изображение будет растянуто на всю площадь экрана */
+            padding: 0;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            padding-top: 60px;
+        }
+
+
+        .goal-container {
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            background: url('varana.png') no-repeat center center;
+            background-size: contain;
+            padding-top: 10%;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            grid-row-gap: 10px;
+            column-gap: 5px;
+            z-index: 1;
+        }
+
+        .circle {
+            width: 100%;
+            height: 0;
+            padding-bottom: 60%;
+            background-image: url('ball.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            place-self: center;
+            transform: translateY(-22px);
+            transition: opacity 0.3s ease;
+        }
+
+        .circle.hidden {
+            opacity: 0;
+        }
+
+        .pulsating {
+            background-image: url('ballred.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            animation: pulse 1s infinite;
+            transform: translateY(-22px) scale(1);
+        }
+
+        .replaced {
+            background-image: url('football.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transform: translateY(-22px) scale(0);
+            animation: appear 0.5s forwards ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translateY(-22px) scale(1);
+            }
+            50% {
+                transform: translateY(-22px) scale(1.2);
+            }
+            100% {
+                transform: translateY(-22px) scale(1);
+            }
+        }
+
+        @keyframes appear {
+            from {
+                transform: translateY(-22px) scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(-22px) scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        .kick-button {
+            font-family: 'Intro', sans-serif;
+            margin-top: 20px;
+            padding: 12px 40px;
+            font-size: 18px;
+            background: linear-gradient(145deg, #ff3333, #ff0000);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3),
+                        inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kick-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .kick-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 0, 0.4),
+                        inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(145deg, #ff4444, #ff1111);
+        }
+
+        .kick-button:hover::after {
+            left: 100%;
+        }
+
+        .kick-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(255, 0, 0, 0.3),
+                        inset 0 -1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-height: 632px) {
+            .kick-button {
+                padding: 8px 30px;
+                font-size: 16px;
+            }
+        }
+
+       .counter-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+        }
+
+
+        .counter {
+            width: 80%;
+            max-width: 500px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 0;
+            position: relative;
+            margin-top: 55%;
+            border: 2px solid rgba(255, 255, 255, 1);
+            overflow: hidden;
+        }
+
+        .fill {
+            background: linear-gradient(90deg,
+                #2ecc71,
+                #27ae60
+            );
+            border-radius: 30px;
+            height: 100%;
+            width: 0%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dot {
+            position: absolute;
+            z-index: 1;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dot:nth-child(2) { left: 20%; }
+        .dot:nth-child(3) { left: 40%; }
+        .dot:nth-child(4) { left: 60%; }
+        .dot:nth-child(5) { left: 80%; }
+        .dot:nth-child(6) { left: 100%; transform: translateX(-100%); }
+
+        .dot.active {
+            background-color: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .dot:nth-child(6).active {
+            transform: translateX(-100%) scale(1.2);
+        }
+
+        .labels {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 500px;
+            margin-top: 12px;
+            margin-bottom: 10%;
+            padding: 0;
+            position: relative;
+        }
+
+        .labels span {
+            font-family: 'Intro', sans-serif;
+            font-size: 16px;
+            color: white;
+            font-style: italic;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            position: absolute;
+        }
+
+        .labels span:nth-child(1) { left: 20%; transform: translateX(-50%); }
+        .labels span:nth-child(2) { left: 40%; transform: translateX(-50%); }
+        .labels span:nth-child(3) { left: 60%; transform: translateX(-50%); }
+        .labels span:nth-child(4) { left: 80%; transform: translateX(-50%); }
+        .labels span:nth-child(5) { left: 100%; transform: translateX(-50%); }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column; /* Располагаем кнопки вертикально */
+            align-items: center; /* Центрируем кнопки по горизонтали */
+            gap: 20px; /* Добавляем отступы между кнопками */
+            margin-top: 20px;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            z-index: 10;
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            font-family: 'Intro', Arial, sans-serif;
+            box-sizing: border-box;
+            font-size: 24px;
+        }
+        header img {
+            height: 30px;
+            width: 30px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+         @media (max-height: 632px) {
+        .counter-container {
+            width: 100%;
+            margin-top: -22%;
+        }
+
+        .counter {
+            height: 10px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+        }
+
+        .goal-container {
+            grid-row-gap: 3px;
+            column-gap: 2px;
+        }
+    }
+        /* Убираем синий эффект выделения при нажатии на мобильных устройствах */
+        button, select, input, textarea, a {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-focus-ring-color: transparent;
+            outline: none;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent; /* Убирает подсветку при нажатии на любом элементе */
+            -webkit-touch-callout: none; /* Отключает вызов меню на долгий тап */
+        }
+
+        .banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 140px;
+            width: 100%;
+            background: linear-gradient(90deg,
+                rgba(0, 0, 0, 0.9),
+                rgba(40, 40, 40, 0.95),
+                rgba(0, 0, 0, 0.9)
+            );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .banner-content {
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .banner-text {
+            font-family: 'Intro', sans-serif;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            position: absolute;
+            margin-top: 100px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: auto;
+            white-space: nowrap;
+        }
+
+        .banner-highlight {
+            color: #ff3333;
+            font-style: italic;
+        }
+
+        .banner-x {
+            color: #4CAF50;
+            font-size: 24px;
+            margin: 0 8px;
+            font-weight: normal;
+        }
+
+        @media (max-width: 480px) {
+            .banner-text {
+                font-size: 16px;
+            }
+            .banner-x {
+                font-size: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <div class="banner-content">
+            <span class="banner-text">
+                <span class="banner-highlight">SIGNAL LEGEND</span>
+                <span class="banner-x">×</span>
+                Penalty Shoot Out
+            </span>
+        </div>
+    </div>
+    <div class="counter-container">
+        <div class="counter">
+            <div class="fill"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="labels">
+            <span>x2</span>
+            <span>x4</span>
+            <span>x12</span>
+            <span>x20</span>
+            <span>x32</span>
+        </div>
+    </div>
+    <div class="goal-container">
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div><div class="circle"></div>
+    </div>
+
+    <div class="buttons-container">
+        <button class="kick-button">KICK</button>
+    </div>
+
+    <!-- Анимация движущихся мячей -->
+    <div class="moving-ball"></div>
+    <div class="moving-ball" style="animation-delay: 3s;"></div>
+    <div class="moving-ball" style="animation-delay: 6s;"></div>
+
+    <script src="telegram-web-app.js"></script>
+    <script>
+          function triggerHapticFeedback() {
+            if (window.Telegram && window.Telegram.WebApp.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            }
+        }
+        let pulseCount = 0;
+
+document.querySelector('.kick-button').addEventListener('click', function() {
+    triggerHapticFeedback();
+    const circles = document.querySelectorAll('.circle');
+    const availableCircles = Array.from(circles).filter(circle => !circle.classList.contains('hidden') && !circle.classList.contains('replaced'));
+    const dots = document.querySelectorAll('.dot');
+    const fill = document.querySelector('.fill'); // Получаем элемент заполнения
+
+    if (pulseCount < 5 && availableCircles.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableCircles.length);
+        const chosenCircle = availableCircles[randomIndex];
+
+        chosenCircle.classList.add('hidden');
+        setTimeout(() => {
+            chosenCircle.classList.remove('hidden');
+            chosenCircle.classList.add('pulsating');
+
+            setTimeout(() => {
+                chosenCircle.classList.remove('pulsating');
+                chosenCircle.classList.add('replaced');
+                dots[pulseCount].classList.add('active');
+                const fillWidths = [24, 44, 64, 84, 100];  // Каждый шаг +22%, кроме последнего
+                fill.style.width = `${fillWidths[pulseCount]}%`;
+                pulseCount++;
+            }, 2500);
+        }, 300);
+    } else if (pulseCount >= 5) {
+        // Сбрасываем мячи, счетчик и заполнение
+        circles.forEach(circle => {
+            circle.classList.remove('hidden', 'pulsating', 'replaced');
+        });
+        dots.forEach(dot => dot.classList.remove('active'));
+        fill.style.width = '0%'; // Сбрасываем заполнение
+        pulseCount = 0;
+    }
+});
+    </script>
+</body>
+</html>

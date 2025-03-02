@@ -1,1 +1,1 @@
-# penaltymoy.github.io
+# penalty.github.io
